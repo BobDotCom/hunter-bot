@@ -1,0 +1,83 @@
+#[build-system]
+#requires = [
+#    "setuptools>=62.6,<66",
+#    "setuptools-scm>=6.2,<8",
+#]
+#build-backend = "setuptools.build_meta"
+
+[project]
+name = "hunter-bot"
+authors = [
+    {name = "BobDotCom"}
+]
+description = ""
+readme = "README.rst"
+requires-python = ">=3.11"
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Internet",
+    "Typing :: Typed",
+]
+dynamic = ["version", "dependencies", "optional-dependencies"]
+
+[project.urls]
+#Homepage = ""
+#Changelog = ""
+Source = "https://github.com/BobDotCom/hunter-bot"
+#Documentation = ""
+Tracker = "https://github.com/BobDotCom/hunter-bot/issues"
+#Funding = ""
+
+#[tool.setuptools]
+#packages = [
+#]
+
+#[tool.setuptools.dynamic]
+#dependencies = {file = "requirements/_.txt"}
+#
+#[tool.setuptools.dynamic.optional-dependencies]
+#
+#[tool.setuptools_scm]
+
+[tool.black]
+target-version = ['py311']
+
+[tool.isort]
+profile = "black"
+
+[tool.mypy]
+namespace_packages = true
+install_types = true
+strict = true
+show_error_codes = true
+#ignore_errors = true
+
+[tool.pylint.main]
+#extension-pkg-whitelist = [
+#    "pydantic",
+#    "ujson"
+#]
+py-version = 3.11
+
+[tool.pylint.messages_control]
+enable = [
+    "bad-indentation",
+    "line-too-long"
+]
+disable = [
+    "missing-module-docstring",
+    "fixme"
+]
+
+[tool.pylint.format]
+indent-string = '    '
+max-line-length = 120
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+
+[tool.codespell]
+skip = "venv,.git"
