@@ -1,0 +1,3 @@
+[submodule "hunter-scenarios"]
+	path = hunter-scenarios
+	url = https://gitlab.com/vanosten/hunter-scenarios
