@@ -24,7 +24,7 @@ services:
       - POSTGRES_DB=example
       - POSTGRES_PASSWORD_FILE=/run/secrets/db-password
       - BOT_TOKEN_FILE=/run/secrets/token
-      - HUNTER_VERSION=1.12.0
+      - HUNTER_VERSION=1.13.0
 #      - BOT_PROXY_URL=http://host.docker.internal:9080 # TODO: Remove this
       - POSTGRES_HOST=db
 #    volumes:
