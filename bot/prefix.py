@@ -62,7 +62,7 @@ async def prefix_for(bot: Bot, message: Message) -> tuple[str, ...]:
         The possible prefixes for the message.
     """
     # Let's make some assertions, just to make the linters happy.
-    if message.guild == bot.home_guild:
-        return (".",)
+    # if message.guild == bot.home_guild:
+    #     return (".",)
 
     return tuple()
