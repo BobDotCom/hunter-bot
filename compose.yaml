@@ -27,14 +27,14 @@ services:
       - HUNTER_VERSION=1.13.0
 #      - BOT_PROXY_URL=http://host.docker.internal:9080 # TODO: Remove this
       - POSTGRES_HOST=db
-#    volumes:
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
 #      - type: bind
 #        source: ~/.docker/run/docker.sock
 #        target: /var/run/docker.sock
 #      - "~/.lima/docker1/sock/docker.sock:/var/run/docker.sock"
 #      - "~/.docker/run:/var/run"
 #      - "~/.docker/run/docker.sock:/var/run/docker.sock"
-#      - "/var/run/docker.sock:/var/run/docker.sock"
 
 # The commented out section below is an example of how to define a PostgreSQL
 # database that your application can use. `depends_on` tells Docker Compose to
