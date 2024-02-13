@@ -64,8 +64,8 @@ class Bot(_Bot):
         """
         os.environ["JISHAKU_NO_UNDERSCORE"] = "True"
         os.environ['JISHAKU_RETAIN'] = "True"
-        self.owner_id = None
-        self.owner_ids = [690420846774321221]
+        # self.owner_id = None
+        # self.owner_ids = [690420846774321221]
         self.load_extension("jishaku")
 
     def uptime(self) -> datetime.timedelta:
