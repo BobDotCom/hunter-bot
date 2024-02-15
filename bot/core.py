@@ -278,6 +278,15 @@ class Listeners:
                             "Missing required argument. While handling this error, another error occurred.",
                         )
                     raise InfoExc(error.args[0])
+
+                if isinstance(error, CheckFailure):
+                    if isinstance(error, MissingRole):
+                        # The default message is fine, but if missing_role is a snowflake, make it a mention
+                        if isinstance(error.missing_role, int):
+                            error = MissingRole(f"<@&{error.missing_role}>")
+
+                    raise InfoExc(error.args[0])
+
                 if isinstance(error, CommandNotFound):
                     return
                 traceback.print_exception(type(error), error, error.__traceback__)
