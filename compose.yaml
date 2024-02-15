@@ -20,13 +20,15 @@ services:
       - token
       - db-password
     environment:
-      - DOCKER_HOST=unix:///var/run/docker.sock
       - POSTGRES_DB=example
       - POSTGRES_PASSWORD_FILE=/run/secrets/db-password
-      - BOT_TOKEN_FILE=/run/secrets/token
-      - HUNTER_VERSION=1.13.0
-#      - BOT_PROXY_URL=http://host.docker.internal:9080 # TODO: Remove this
       - POSTGRES_HOST=db
+      - BOT_TOKEN_FILE=/run/secrets/token
+#      - BOT_PROXY_URL=http://host.docker.internal:9080 # TODO: Remove this
+      - DOCKER_HOST=unix:///var/run/docker.sock
+      - PERSISTENT_STORE_PATH=/var/run/persistent-store
+
+      - HUNTER_VERSION=1.13.0
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock"
 #      - type: bind
@@ -73,6 +75,6 @@ volumes:
   db-data:
 secrets:
   db-password:
-    file: secrets/password.txt
+    file: data/secrets/password.txt
   token:
-    file: secrets/token.txt
+    file: data/secrets/token.txt
