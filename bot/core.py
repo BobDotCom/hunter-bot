@@ -43,6 +43,7 @@ _log = logging.getLogger(__name__)
 class Bot(_Bot):
     default_prefixes = "h.", "hunter."
     extensions_to_load = "general", "hunter"
+    home_guild: Object | Guild = Object(id=742628032111706194)
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
 
@@ -222,11 +223,11 @@ class Listeners:
         Ready handler
         """
         print(f"Ready. Logged in as {self.bot.user}")
-        # if isinstance(self.bot.home_guild, Object):
-        #     try:
-        #         self.bot.home_guild = await get_or_fetch(self.bot, "guild", self.bot.home_guild.id)
-        #     except Forbidden:
-        #         _log.error("Failed to fetch home guild, bot is not in server")
+        if isinstance(self.bot.home_guild, Object):
+            try:
+                self.bot.home_guild = await get_or_fetch(self.bot, "guild", self.bot.home_guild.id)
+            except Forbidden:
+                _log.error("Failed to fetch home guild, bot is not in server")
 
     @staticmethod
     async def on_disconnect() -> None:
