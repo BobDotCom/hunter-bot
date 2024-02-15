@@ -150,8 +150,9 @@ class Bot(_Bot):
 
     async def close(self) -> None:
         """
-        Closes the bot, and cleans up the database connection.
+        Closes the bot, cleans up the database connection, and saves persistent store data.
         """
+        self.hunter.persistent_store.save()
         await Tortoise.close_connections()
         await super().close()
 

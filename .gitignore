@@ -240,3 +240,4 @@ fabric.properties
 
 ### Custom
 data/
+secrets/

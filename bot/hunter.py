@@ -26,6 +26,7 @@ from docker.models.containers import Container
 __all__ = "scenario_dir", "available_scenarios", "Hunter", "HunterConfig"
 
 from bot.error import InfoExc, ErrorExc
+from bot.persistent_store import PersistentStore
 
 scenario_dir = f"{os.path.dirname(os.path.dirname(os.path.realpath(__file__)))}/hunter-scenarios"
 available_scenarios = list(
@@ -91,13 +92,22 @@ class Hunter:
         self.container_name = "hunter_bot_container"
         self.image_name = "vanosten/hunter_container"
         self.container: Container | None = None
-        self.config: HunterConfig | None = None
+        self.persistent_store = PersistentStore(os.environ["PERSISTENT_STORE_FILE"], ["config"])
+        self._config: HunterConfig | None = self.persistent_store.config
 
         try:
             if self.client.containers.get(self.container_name):
                 self.container = self.client.containers.get(self.container_name)
         except docker.errors.NotFound:
             pass
+
+    @property
+    def config(self) -> HunterConfig:
+        return self.persistent_store.config
+
+    @config.setter
+    def config(self, conf: HunterConfig):
+        self.persistent_store.config = conf
 
     @property
     def exists(self):
