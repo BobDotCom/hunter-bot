@@ -19,38 +19,48 @@ import os
 import re
 from itertools import batched
 
+import discord
 from discord import command, ApplicationContext, slash_command, option, SlashCommandGroup
+from discord.ext import commands
 from discord.ext.commands import Cog
 from discord.ext.pages import Paginator
+from discord.ui import View, button, Button
+from docker.errors import APIError
 
 from ..core import Bot
-from ..error import WarningExc
+from ..error import WarningExc, ErrorExc, InfoExc
+from ..hunter import HunterConfig, available_scenarios
 from ..models import Ping
 from ..utils import embed, Timer
 
 
-scenario_dir = f"{os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))}/hunter-scenarios"
-available_scenarios = list(
-    map(
-        lambda scenario: scenario[9:-3],
-        filter(lambda scenario: re.match(r"scenario_\w+\.py", scenario), os.listdir(scenario_dir))
-    )
-)
-
-
-async def _start_hunter(ctx: ApplicationContext, scenario: str):
+async def _run_hunter(
+        ctx: ApplicationContext,
+        scenario: str,
+        gci: bool = False,
+        hostility: str = "0_0_0_0_0",
+        human_defenders: str = ""
+):
     try:
         if ctx.bot.hunter.running:
-            return await ctx.respond("Hunter is already running!")
-        ctx.bot.hunter.start(scenario)
+            raise InfoExc("Hunter is already running!")
+        config = HunterConfig(
+            scenario=scenario,
+            gci=gci,
+            hostility=hostility,
+            human_defenders=human_defenders,
+        )
+        ctx.bot.hunter.run(config)
         await ctx.respond(f"Starting hunter in `{scenario}`")
-    except:
-        raise WarningExc("Docker daemon is disconnected, please contact the owner of this bot")
+    except APIError as e:
+        raise ErrorExc(
+            "Could not start session. Likely the docker daemon is disconnected, please contact the owner of this bot"
+        ) from e
 
 
 async def _stop_hunter(ctx: ApplicationContext):
     if not ctx.bot.hunter.running:
-        return await ctx.respond("Hunter is not running yet!")
+        raise InfoExc("Hunter is not running yet!")
     ctx.bot.hunter.stop()
     await ctx.respond("Hunter is stopping")
 
@@ -65,8 +75,15 @@ class Hunter(Cog):
 
     @hunter_group.command()
     @option("scenario", choices=available_scenarios)
-    async def start(self, ctx: ApplicationContext, scenario):
-        await _start_hunter(ctx, scenario)
+    async def run(
+            self,
+            ctx: ApplicationContext,
+            scenario: str,
+            gci: bool = False,
+            hostility: str = "0_0_0_0_0",
+            human_defenders: str = ""
+    ):
+        await _run_hunter(ctx, scenario, gci=gci, hostility=hostility, human_defenders=human_defenders)
 
     @hunter_group.command()
     async def stop(self, ctx: ApplicationContext):
@@ -74,14 +91,15 @@ class Hunter(Cog):
         await _stop_hunter(ctx)
 
     @hunter_group.command()
+    @commands.is_owner()
     async def logs(self, ctx: ApplicationContext):
         # TODO: Make private
-        if not ctx.bot.hunter.running:
-            return await ctx.respond("Hunter is not running!")
+        if not self.bot.hunter.exists:
+            raise InfoExc("Hunter container unavailable!")
         paginator = Paginator(
-            pages=list(map(lambda _: "".join(_), batched(ctx.bot.hunter.logs().decode("utf-8"), n=2000)))
+            pages=list(map(lambda _: f"```{"".join(_)}```", batched(self.bot.hunter.logs(), n=1994)))
         )
-        await paginator.respond(ctx.interaction)
+        await paginator.respond(ctx.interaction, ephemeral=True)
         # await ctx.respond
 
     @hunter_group.command()
