@@ -25,15 +25,15 @@ from typing import Any
 import re
 
 from discord import Intents, ApplicationContext, option, ApplicationCommandError, Permissions, Message, \
-     Activity, ActivityType
-from discord.utils import copy_doc
+    Activity, ActivityType, Object, Guild, Forbidden
+from discord.utils import copy_doc, get_or_fetch
 from tortoise import Tortoise
 
 from .error import BaseError, InfoExc, ErrorExc, BotPermissionError
 from discord.ext.pages import Paginator
 # from git import Repo  # type: ignore
 from discord.ext.commands import Bot as _Bot, CommandError, CommandNotFound, MissingRequiredArgument, UserInputError, \
-    BotMissingPermissions, Context
+    BotMissingPermissions, Context, CheckFailure, MissingRole
 
 from .hunter import Hunter
 
@@ -66,7 +66,11 @@ class Bot(_Bot):
         os.environ["JISHAKU_NO_UNDERSCORE"] = "True"
         os.environ['JISHAKU_RETAIN'] = "True"
         # self.owner_id = None
-        # self.owner_ids = [690420846774321221]
+        self.owner_ids = {
+            690420846774321221,  # @bobdotcom
+            380086540073959434,  # @vanosten
+            218638666329751552,  # @.pinto
+        }
         self.load_extension("jishaku")
 
     def uptime(self) -> datetime.timedelta:
