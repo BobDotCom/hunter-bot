@@ -37,6 +37,24 @@ services:
 #      - "~/.lima/docker1/sock/docker.sock:/var/run/docker.sock"
 #      - "~/.docker/run:/var/run"
 #      - "~/.docker/run/docker.sock:/var/run/docker.sock"
+    develop:
+      watch:
+        - path: .
+          action: sync
+
+#    deploy:
+#      restart_policy:
+#        condition: on-failure
+#        delay: 5s
+#        max_attempts: 3
+#        window: 30s
+#      rollback_config:
+#        delay: 5s
+#        monitor: 30s
+#      update_config:
+#        delay: 5s
+#        monitor: 30s
+#        failure_action: rollback
 
 # The commented out section below is an example of how to define a PostgreSQL
 # database that your application can use. `depends_on` tells Docker Compose to
