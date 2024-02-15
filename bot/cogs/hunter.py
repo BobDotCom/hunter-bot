@@ -93,7 +93,6 @@ class Hunter(Cog):
     @hunter_group.command()
     @commands.is_owner()
     async def logs(self, ctx: ApplicationContext):
-        # TODO: Make private
         if not self.bot.hunter.exists:
             raise InfoExc("Hunter container unavailable!")
         paginator = Paginator(
@@ -106,16 +105,89 @@ class Hunter(Cog):
     async def status(self, ctx: ApplicationContext):
         # Include: Container status, started by, runtime, more?
         # Possibly: Last session details?
-        return
+        def make_embed():
+            em = embed(
+                title="Hunter Status",
+                description=self.bot.hunter.container.status.title() if self.bot.hunter.exists else "Unavailable",
+            )
+            if self.bot.hunter.config is not None:
+                em.add_field(
+                    name="Scenario",
+                    value=self.bot.hunter.config.scenario.title(),
+                ),
+                em.add_field(
+                    name="GCI",
+                    value=self.bot.hunter.config.gci,
+                )
+                em.add_field(
+                    name="Hostility",
+                    value=self.bot.hunter.config.hostility,
+                )
+                em.add_field(
+                    name="Human Defenders",
+                    value=self.bot.hunter.config.human_defenders,
+                )
+            return em
 
-    @slash_command()
-    @option("scenario", choices=available_scenarios)
-    async def start_hunter(self, ctx: ApplicationContext, scenario: str):
-        await _start_hunter(ctx, scenario)
+        class MyView(View):
+            async def on_timeout(self):
+                self.disable_all_items()
+                await self.message.edit(embed=make_embed(), view=self)
 
-    @slash_command()
-    async def stop_hunter(self, ctx: ApplicationContext):
-        await _stop_hunter(ctx)
+            def update_buttons(self):
+                for child in self.children:
+                    if not isinstance(child, Button):
+                        continue
+                    match child.label.casefold():
+                        case "start":
+                            child.disabled = ctx.bot.hunter.running or not ctx.bot.hunter.exists
+                        case ("restart" | "stop"):
+                            child.disabled = not ctx.bot.hunter.running
+
+            @button(
+                label="Start",
+                style=discord.ButtonStyle.green,
+                emoji="▶",
+                disabled=self.bot.hunter.running or not self.bot.hunter.exists,
+            )
+            async def start_button(self, b, interaction):
+                ctx.bot.hunter.start()
+                self.update_buttons()
+                await interaction.response.send_message(
+                    f"Starting hunter (requested by {interaction.user.mention})"
+                )
+                await self.message.edit(embed=make_embed(), view=self)
+
+            @button(
+                label="Restart",
+                style=discord.ButtonStyle.primary,
+                emoji="🔄",
+                disabled=not self.bot.hunter.running,
+            )
+            async def restart_button(self, b, interaction):
+                ctx.bot.hunter.restart()
+                self.update_buttons()
+                await interaction.response.send_message(
+                    f"Restarting hunter (requested by {interaction.user.mention})"
+                )
+                await self.message.edit(embed=make_embed(), view=self)
+
+            @button(
+                label="Stop",
+                style=discord.ButtonStyle.red,
+                emoji="⏹",
+                disabled=not self.bot.hunter.running,
+            )
+            async def stop_button(self, b, interaction):
+                ctx.bot.hunter.stop()
+                self.update_buttons()
+                await interaction.response.send_message(
+                    f"Stopping hunter (requested by {interaction.user.mention})"
+                )
+                await self.message.edit(embed=make_embed(), view=self)
+
+        view = MyView(timeout=120)
+        view.message = await ctx.respond(embed=make_embed(), view=view)
 
 
 def setup(bot: Bot) -> None:
